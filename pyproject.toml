@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "starlette-hmac"
+version = "0.0.1"
+description = "Starlette middleware for hmac access key"
+authors = ["Luca Simone <info@lucasimone.info>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+starlette = "^0.31.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+httpx = "^0.25.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
