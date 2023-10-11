@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "starlette-hmac"
-version = "0.0.1"
+version = "0.0.2"
 description = "Starlette middleware for hmac access key"
 authors = ["Luca Simone <info@lucasimone.info>"]
 license = "MIT"
