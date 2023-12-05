@@ -1,3 +1,5 @@
+import hashlib
+
 import pytest
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
@@ -15,7 +17,16 @@ def shared_secret():
 
 
 @pytest.fixture
-def app(shared_secret, **middleware_kwargs) -> Starlette:
+def middleware_kwargs() -> dict:
+    return {
+        "header_field": "authorization",
+        "digestmod": hashlib.sha256,
+        "header_format": "HMAC {}",
+    }
+
+
+@pytest.fixture
+def app(shared_secret, middleware_kwargs) -> Starlette:
     async def get(request: Request):
         return JSONResponse({"hello": "world"})
 
@@ -29,7 +40,9 @@ def app(shared_secret, **middleware_kwargs) -> Starlette:
             Route("/get", get, methods=["GET"]),
             Route("/post", post, methods=["POST"]),
         ],
-        middleware=[Middleware(HMACMiddleware, shared_secret=shared_secret, **middleware_kwargs)],
+        middleware=[
+            Middleware(HMACMiddleware, shared_secret=shared_secret, **middleware_kwargs)
+        ],
     )
 
     return app
@@ -45,7 +58,7 @@ def test_simple_hmac(app):
     payload = b'{"text": "test"}'
     middleware = HMACMiddleware(app=app, shared_secret=shared_secret)
     hmac = middleware.compute_hmac(payload)
-    assert hmac == "HMAC uYRUNd8Qu0vogK9Kv92FWZrFMsoroEl0RfE8hMUJAl8="
+    assert hmac == "uYRUNd8Qu0vogK9Kv92FWZrFMsoroEl0RfE8hMUJAl8="
 
 
 def test_unauthorized(app):
@@ -60,13 +73,36 @@ def test_authentication(app):
     assert response.status_code == 401
 
 
-def test_authentication_pass(app, client):
+def test_authentication_pass(client):
     payload = {"text": "test"}
     response = client.post(
         "/post",
         json=payload,
         headers=[
             ("authorization", "HMAC uYRUNd8Qu0vogK9Kv92FWZrFMsoroEl0RfE8hMUJAl8=")
+        ],
+    )
+    assert response.status_code == 200
+    assert "text" in response.json()
+
+
+@pytest.mark.parametrize(
+    "middleware_kwargs",
+    [
+        {
+            "header_field": "x-hub-signature",
+            "digestmod": hashlib.sha256,
+            "header_format": "sha256={}",
+        }
+    ],
+)
+def test_header_field(middleware_kwargs, client):
+    payload = {"text": "test"}
+    response = client.post(
+        "/post",
+        json=payload,
+        headers=[
+            ("x-hub-signature", "sha256=uYRUNd8Qu0vogK9Kv92FWZrFMsoroEl0RfE8hMUJAl8=")
         ],
     )
     assert response.status_code == 200
