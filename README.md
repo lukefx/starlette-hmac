@@ -41,7 +41,7 @@ app.add_middleware(HMACMiddleware,
                    shared_secret=shared_secret, 
                    header_field="x-hub-signature", 
                    digestmod=hashlib.sha256, 
-                   "header_format"="sha256={}"
+                   header_format="sha256={}"
 )
 ```
 
