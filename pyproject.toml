@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "starlette-hmac"
-version = "0.0.3"
+version = "0.0.4"
 description = "Starlette middleware for hmac access key"
 authors = ["Luca Simone <info@lucasimone.info>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 starlette = "<0.28.0"
 
 [tool.poetry.group.dev.dependencies]
